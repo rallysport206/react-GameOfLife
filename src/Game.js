@@ -30,24 +30,8 @@ class Game extends React.Component{
 
     state = {
         cells: [],
-    }
-    
-    render() {
-        const { cells } = this.state;
-        return (
-            <div>
-                <div className="Board"
-                    style={{width: WIDTH, height: HEIGHT,
-                        backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`}}
-                    onClick={this.handleClick}
-                    ref={(n) => { this.boardRef = n; }}>  
-                    {cells.map(cell => (
-                        <Cell x={cell.x} y={cell.y}
-                            key={`${cell.x},${cell.y}`}/>
-                    ))}  
-                </div>
-            </div>
-        );
+        interval: 100,
+        isRunning: false,
     }
 
     //Creating an Empty board
@@ -97,6 +81,80 @@ class Game extends React.Component{
         }
         this.setState({ cells: this.makeCells() });
     }
-}
+    
+    runGame = () => {
+        this.setState({ isRunning: true });
+        this.runIteration();
+    }
+    
+    stopGame = () => {
+        this.setState({ isRunning: false });
+        if (this.timeoutHandler) {
+            window.clearTimeout(this.timeoutHandler);
+            this.timeoutHandler = null;
+        }
+    }
 
+    runIteration() {
+        console.log('running iteration');
+        let newBoard = this.makeEmptyBoard();
+
+        // Add logic for each iteration here:
+        for (let y = 0; y < this.rows; y++) {
+            for (let x = 0; x < this.cols; x++) {
+                let neighbors = this.calculateNeighbors(this.board, x, y);
+                if (this.board[y][x]) {
+                    if (neighbors === 2 || neighbors === 3){
+                        newBoard[y][x] = true;
+                    } else {
+                        if (!this.board[y][x] && neighbors === 3) {
+                            newBoard[y][x] = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        this.board = newBoard;
+        this.setState({ cells: this.makeCells() });
+
+        this.timeoutHandler = window.setTimeout(() => {
+            this.runIteration();
+        },  this.state.interval);
+    }
+    
+    handleIntervalChange = (event) => {
+        this.setState({ interval: event.target.value });
+    }
+
+    render() {
+        const { cells, interval, isRunning } = this.state;
+        return (
+            <div>
+                <div className="Board"
+                    style={{width: WIDTH, height: HEIGHT,
+                        backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`}}
+                    onClick={this.handleClick}
+                    ref={(n) => { this.boardRef = n; }}>  
+                    {cells.map(cell => (
+                        <Cell x={cell.x} y={cell.y}
+                            key={`${cell.x},${cell.y}`}/>
+                    ))}  
+                </div>
+                <div className="controls">
+                    Update every <input value={this.state.interval}
+                        onChange={this.handleIntervalChange} /> msec
+                    {isRunning ?
+                        <button className="button"
+                            onClick={this.stopGame}>Stop</button> :
+                        <button className="button"
+                            onClick={this.runGame}>Run</button>
+                    }
+                </div>
+            </div>
+        );
+    }
+    
+    
+}
 export default Game;
