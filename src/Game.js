@@ -20,7 +20,18 @@ class Cell extends React.Component{
 }
 
 class Game extends React.Component{
+    
+    constructor(){
+        super();
+        this.rows = HEIGHT/ CELL_SIZE;
+        this.cols = WIDTH / CELL_SIZE;
+        this.board = this.makeEmptyBoard();
+    }
 
+    state = {
+        cells: [],
+    }
+    
     render() {
         const { cells } = this.state;
         return (
@@ -37,17 +48,6 @@ class Game extends React.Component{
                 </div>
             </div>
         );
-    }
-
-    constructor(){
-        super();
-        this.rows = HEIGHT/ CELL_SIZE;
-        this.cols = WIDTH / CELL_SIZE;
-        this.board = this.makeEmptyBoard();
-    }
-
-    state = {
-        cells: [],
     }
 
     //Creating an Empty board
@@ -78,7 +78,7 @@ class Game extends React.Component{
         for (let y = 0; y < this.rows; y++) {
             for (let x = 0; x < this.cols; x++){
                 if (this.board[y][x]){
-                    cells.push({ x,y });
+                    cells.push({ x, y });
                 }
             }
         }
